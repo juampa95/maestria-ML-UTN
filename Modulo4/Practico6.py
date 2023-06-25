@@ -198,7 +198,7 @@ def func_eval2(pesos, patron, treshold=0):
     resultado = np.dot(patron.flatten(), pesos)
     resultado = np.where(resultado >= treshold, 255, resultado)
     resultado = np.where(resultado < treshold, 0, resultado)
-    return np.reshape(resultado,(patron.shape[0],patron.shape[0]))
+    return np.reshape(resultado, (patron.shape[0], patron.shape[0]))
 
 
 # ----
@@ -207,7 +207,7 @@ def func_eval2(pesos, patron, treshold=0):
 matriz_w = get_weight(memoria)
 print(matriz_w)
 
-print(func_eval2(matriz_w,patron1))
+print(func_eval2(matriz_w, patron1))
 
 # ----
 
@@ -312,9 +312,6 @@ print(patron5)
 print(norm(patron5))
 print(np.dot(norm(patron5), matriz_w))
 
-
-
-
 ######################## PRUEBA CON NUEVA VERSION
 
 np.random.seed(7)
@@ -337,19 +334,16 @@ print(resultado1)
 resultado2 = func_eval2(matriz_w, resultado1)
 print(resultado2)
 
-
-patron4 = mod_mat(memoria3, 10,"ran",10)
+patron4 = mod_mat(memoria3, 10, "ran", 10)
 print(memoria2)
 print(memoria3)
 print(patron4)
-
 
 resultado1 = func_eval2(matriz_w, patron4)
 print(resultado1)
 
 resultado2 = func_eval2(matriz_w, resultado1)
 print(resultado2)
-
 
 # =============================================================================
 # Ejercicio 4
@@ -404,6 +398,79 @@ ax.legend()
 
 plt.show()
 
+
 # =============================================================================
 # Ejercicio 5
 # =============================================================================
+
+# =============================================================================
+# Ejercicio 6
+# =============================================================================
+
+# =============================================================================
+# Ejercicio 7
+# =============================================================================
+class Perceptron:
+    def __init__(self, input_size):
+        self.weights = np.random.randn(input_size)
+        self.bias = np.random.randn()
+
+    def activation(self, x):
+        return np.tanh(x)
+
+    def predict(self, inputs):
+        summation = np.dot(inputs, self.weights) + self.bias
+        return self.activation(summation)
+
+    def train(self, training_data, epochs):
+        for _ in range(epochs):
+            for inputs, label in training_data:
+                prediction = self.predict(inputs)
+                error = label - prediction
+                self.weights += error * inputs
+                self.bias += error
+
+
+# Datos de entrenamiento
+# Generar todas las combinaciones posibles de 9 bits
+bit_combinations = np.array(
+    np.meshgrid([0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1])).T.reshape(-1, 9)
+
+# Crear el conjunto de datos de entrenamiento
+training_data = []
+
+# Asignar los bits y sus etiquetas correspondientes al conjunto de datos de entrenamiento
+for inputs in bit_combinations:
+    count_ones = np.sum(inputs)
+    label = 1 if count_ones > 4 else -1  # Asignar etiqueta 1 si hay mayoría de unos, -1 en caso contrario
+    training_data.append((inputs, label))
+
+# Imprimir el conjunto de datos de entrenamiento generado
+for inputs, label in training_data:
+    print(f"Entradas: {inputs}, Etiqueta: {label}")
+
+# Crear y entrenar el perceptrón
+perceptron = Perceptron(input_size=9)
+perceptron.train(training_data, epochs=8)
+
+# Prueba del perceptrón con una nueva cadena de bits
+new_input = np.array([1, 1, 0, 0, 0, 0, 1, 0, 1])
+prediction = perceptron.predict(new_input)
+if prediction >= 0:
+    print("La cadena tiene mayoría de unos.")
+else:
+    print("La cadena no tiene mayoría de unos.")
+
+# Prueba con todos los valores
+
+for i in [8, 32, 64]:
+    perceptron = Perceptron(input_size=9)
+    perceptron.train(training_data, epochs=i)
+    count = 0
+    for inputs in training_data:
+        pred = perceptron.predict(inputs[0])
+        if pred >= 0:
+            count += 1
+    print(f'Para p = {i}, se obtuvo {count / len(training_data)} de precisión')
+    print(f'Pesos: {perceptron.weights}')
+    print(f'Sesgo: {perceptron.bias}')
